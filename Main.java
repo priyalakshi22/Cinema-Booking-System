@@ -1,1 +1,1 @@
-143.0.3650.96
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"com.cinema.model","l":"Booking"}];updateSearchResults();

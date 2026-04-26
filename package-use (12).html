@@ -1,0 +1,23 @@
+package com.cinemaa;
+
+import com.cinema.model.*;
+import com.cinema.service.CinemaService;
+import java.time.LocalDateTime;
+
+public class Main {
+    public static void main(String[] args) {
+
+        CinemaService service = new CinemaService();
+
+        Movie m1 = service.addMovie("Avatar 2", 150, 400);
+        Showtime st1 = service.addShowtime(m1.getId(), "Hall A", LocalDateTime.now().plusDays(1), 50);
+        Customer c1 = service.addCustomer("Medhani", "medha@example.com", "0777644112");
+
+        Booking b = service.createBooking(c1.getId(), st1.getId(), 2);
+
+        if (b != null)
+            System.out.println("Booking Success → Total Price: " + b.totalPrice());
+        else
+            System.out.println("Booking Failed");
+    }
+}

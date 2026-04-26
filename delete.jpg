@@ -1,0 +1,26 @@
+package com.cinema.model;
+
+public class Booking {
+    private int id;
+    private Customer customer;
+    private Showtime showtime;
+    private int seatCount;
+
+    public Booking(int id, Customer customer, Showtime showtime, int seatCount) {
+        this.id = id;
+        this.customer = customer;
+        this.showtime = showtime;
+        this.seatCount = seatCount;
+    }
+
+    // Getters
+    public int getId() { return id; }
+    public Customer getCustomer() { return customer; }
+    public Showtime getShowtime() { return showtime; }
+    public int getSeatCount() { return seatCount; }
+
+    // Calculate total price
+    public double totalPrice() {
+        return seatCount * showtime.getMovie().getPrice();
+    }
+}

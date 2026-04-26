@@ -1,0 +1,57 @@
+package Database_Connection;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class MySQLDatabaseConnection {
+    // Mock connection that doesn't require MySQL driver
+    private static boolean mockMode = true;
+    
+    static {
+        try {
+            // Try to load the real driver first
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            mockMode = false;
+            System.out.println("✅ Real MySQL driver loaded");
+        } catch (ClassNotFoundException e) {
+            // Fall back to mock mode
+            mockMode = true;
+            System.out.println("⚠️  MySQL driver not found, using mock mode");
+        }
+    }
+
+    public static Connection getConnection() throws SQLException {
+        if (mockMode) {
+            throw new SQLException("Mock mode: No database connection available");
+        }
+        
+        // Your real connection code here
+        String URL = "jdbc:mysql://localhost:3306/cinema_booking_system";
+        String USERNAME = "root";
+        String PASSWORD = "";
+        return DriverManager.getConnection(URL, USERNAME, PASSWORD);
+    }
+    
+    // Test connection
+    public static void testConnection() {
+        if (mockMode) {
+            System.out.println(" Mock mode: Application running without database");
+            return;
+        }
+        
+        try (Connection conn = getConnection()) {
+            System.out.println(" MySQL Database connected successfully!");
+        } catch (SQLException e) {
+            System.out.println(" MySQL Connection failed: " + e.getMessage());
+        }
+    }
+    
+    public static boolean isMockMode() {
+        return mockMode;
+    }
+    
+    public static void main(String[] args) {
+        testConnection();
+    }
+}

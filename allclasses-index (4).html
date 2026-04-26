@@ -1,0 +1,339 @@
+package com.cinema.model;
+
+import com.cinema.service.CinemaService;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.*;
+
+public class CinemaBookingSystem extends JFrame {
+    private JComboBox<String> movieList;
+    private JComboBox<String> showtimeComboBox;
+    private JCheckBox[] seats;
+    private JButton bookButton;
+    private JTextArea outputArea;
+    private JLabel showtimeInfoLabel;
+
+    private CinemaService cinemaService;
+    private Customer customer;
+    private Map<Integer, Movie> movieMap;
+    private Map<Integer, Showtime> showtimeMap;
+    private List<Showtime> availableShowtimes;
+
+    public CinemaBookingSystem() {
+        setTitle("Cinema Booking System");
+        setSize(1000, 700);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
+
+        cinemaService = new CinemaService();
+        initializeData();
+        
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JPanel moviePanel = createMoviePanel();
+        
+        JPanel showtimePanel = createShowtimePanel();
+        
+        JPanel seatPanel = createSeatPanel();
+        
+        JPanel buttonPanel = createButtonPanel();
+        
+        JPanel outputPanel = createOutputPanel();
+
+        JPanel topPanel = new JPanel(new GridLayout(2, 1, 5, 5));
+        topPanel.add(moviePanel);
+        topPanel.add(showtimePanel);
+        
+        mainPanel.add(topPanel, BorderLayout.NORTH);
+        mainPanel.add(seatPanel, BorderLayout.CENTER);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        
+        add(mainPanel, BorderLayout.CENTER);
+        add(outputPanel, BorderLayout.EAST);
+        
+        // Initial update of showtimes
+        updateShowtimes();
+    }
+
+    private void initializeData() {
+        movieMap = new HashMap<>();
+        showtimeMap = new HashMap<>();
+        availableShowtimes = new ArrayList<>();
+
+        // Add movies
+        Movie m1 = cinemaService.addMovie("Avengers", 120, 10.0);
+        Movie m2 = cinemaService.addMovie("Inception", 140, 12.0);
+        Movie m3 = cinemaService.addMovie("Interstellar", 160, 15.0);
+        Movie m4 = cinemaService.addMovie("The Batman", 150, 11.0);
+
+        movieMap.put(m1.getId(), m1);
+        movieMap.put(m2.getId(), m2);
+        movieMap.put(m3.getId(), m3);
+        movieMap.put(m4.getId(), m4);
+
+        // Add showtimes
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        
+        Showtime st1 = cinemaService.addShowtime(m1.getId(), "Hall A", LocalDateTime.now().plusHours(2), 20);
+        
+        Showtime st2 = cinemaService.addShowtime(m1.getId(), "Hall B", LocalDateTime.now().plusHours(4), 20);
+        
+        Showtime st3 = cinemaService.addShowtime(m2.getId(), "Hall C", LocalDateTime.now().plusHours(3), 20);
+        
+        Showtime st4 = cinemaService.addShowtime(m2.getId(), "Hall A", LocalDateTime.now().plusHours(6), 20);
+        
+        Showtime st5 = cinemaService.addShowtime(m3.getId(), "Hall B", LocalDateTime.now().plusHours(5), 20);
+        
+        Showtime st6 = cinemaService.addShowtime(m4.getId(), "Hall D", LocalDateTime.now().plusHours(7), 20);
+
+        showtimeMap.put(st1.getId(), st1);
+        
+        showtimeMap.put(st2.getId(), st2);
+        
+        showtimeMap.put(st3.getId(), st3);
+        
+        showtimeMap.put(st4.getId(), st4);
+        
+        showtimeMap.put(st5.getId(), st5);
+        
+        showtimeMap.put(st6.getId(), st6);
+
+        availableShowtimes.addAll(showtimeMap.values());
+
+        customer = cinemaService.addCustomer("John Doe", "john@example.com", "123456789");
+    }
+
+    private JPanel createMoviePanel() {
+        JPanel moviePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        moviePanel.setBackground(new Color(220, 20, 60));
+        moviePanel.setBorder(BorderFactory.createTitledBorder("Select Movie"));
+        
+        movieList = new JComboBox<>();
+        for (Movie movie : movieMap.values()) {
+            movieList.addItem(movie.getTitle() + " ($" + movie.getPrice() + ")");
+        }
+        
+        movieList.addActionListener(e -> updateShowtimes());
+        
+        moviePanel.add(new JLabel("Movie:"));
+        moviePanel.add(movieList);
+        
+        return moviePanel;
+    }
+
+    private JPanel createShowtimePanel() {
+        JPanel showtimePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        showtimePanel.setBackground(new Color(0, 128, 0));
+        showtimePanel.setBorder(BorderFactory.createTitledBorder("Select Showtime"));
+        
+        showtimeComboBox = new JComboBox<>();
+        showtimeComboBox.addActionListener(e -> updateShowtimeInfo());
+        
+        showtimeInfoLabel = new JLabel("Select a showtime to see details");
+        showtimeInfoLabel.setForeground(Color.WHITE);
+        
+        showtimePanel.add(new JLabel("Showtime:"));
+        showtimePanel.add(showtimeComboBox);
+        showtimePanel.add(showtimeInfoLabel);
+        
+        return showtimePanel;
+    }
+
+    private JPanel createSeatPanel() {
+        JPanel seatPanel = new JPanel(new BorderLayout());
+        seatPanel.setBorder(BorderFactory.createTitledBorder("🎟️ Select Seats"));
+        
+        JPanel gridPanel = new JPanel(new GridLayout(4, 5, 10, 10));
+        gridPanel.setBackground(new Color(245, 245, 245));
+        gridPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        seats = new JCheckBox[20];
+        for (int i = 0; i < seats.length; i++) {
+            seats[i] = new JCheckBox("" + (i + 1));
+            seats[i].setBackground(Color.WHITE);
+            seats[i].setForeground(new Color(0, 128, 0));
+            seats[i].setFont(new Font("Arial", Font.BOLD, 12));
+            seats[i].setHorizontalAlignment(SwingConstants.CENTER);
+            
+            // Style the checkboxes to look like seat buttons
+            seats[i].setPreferredSize(new Dimension(60, 40));
+            gridPanel.add(seats[i]);
+        }
+        
+        seatPanel.add(gridPanel, BorderLayout.CENTER);
+        
+        // Add screen representation
+        JLabel screenLabel = new JLabel("WELCOME", SwingConstants.CENTER);
+        screenLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        screenLabel.setForeground(new Color(139, 0, 0));
+        screenLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 20, 0));
+        seatPanel.add(screenLabel, BorderLayout.NORTH);
+        
+        return seatPanel;
+    }
+
+    private JPanel createButtonPanel() {
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(new Color(240, 240, 240));
+        
+        bookButton = new JButton("Book Tickets");
+        bookButton.setBackground(new Color(220, 20, 60));
+        bookButton.setForeground(Color.WHITE);
+        bookButton.setFont(new Font("Arial", Font.BOLD, 16));
+        bookButton.setPreferredSize(new Dimension(200, 50));
+        bookButton.addActionListener(new BookButtonListener());
+        
+        buttonPanel.add(bookButton);
+        return buttonPanel;
+    }
+
+    private JPanel createOutputPanel() {
+        JPanel outputPanel = new JPanel(new BorderLayout());
+        outputPanel.setBorder(BorderFactory.createTitledBorder("📋 Booking Details"));
+        outputPanel.setPreferredSize(new Dimension(300, 0));
+        
+        outputArea = new JTextArea(10, 25);
+        outputArea.setEditable(false);
+        outputArea.setBackground(new Color(255, 250, 240));
+        outputArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        outputArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        JScrollPane scrollPane = new JScrollPane(outputArea);
+        outputPanel.add(scrollPane, BorderLayout.CENTER);
+        
+        return outputPanel;
+    }
+
+    private void updateShowtimes() {
+        int selectedMovieIndex = movieList.getSelectedIndex();
+        if (selectedMovieIndex < 0) return;
+        
+        // Get selected movie ID (index + 1 since we started from 1)
+        int selectedMovieId = selectedMovieIndex + 1;
+        
+        showtimeComboBox.removeAllItems();
+        
+        // Filter showtimes for selected movie
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, HH:mm");
+        
+        for (Showtime showtime : availableShowtimes) {
+            if (showtime.getMovie().getId() == selectedMovieId) {
+                String showtimeText = String.format("%s - %s (%d seats available)", 
+                    showtime.getTime().format(formatter),
+                    showtime.getHall(),
+                    showtime.getAvailableSeats());
+                showtimeComboBox.addItem(showtimeText);
+            }
+        }
+        
+        if (showtimeComboBox.getItemCount() == 0) {
+            showtimeComboBox.addItem("No showtimes available");
+        }
+        
+        updateShowtimeInfo();
+    }
+
+    private void updateShowtimeInfo() {
+        int selectedMovieIndex = movieList.getSelectedIndex();
+        int selectedShowtimeIndex = showtimeComboBox.getSelectedIndex();
+        
+        if (selectedMovieIndex >= 0 && selectedShowtimeIndex >= 0) {
+            int movieId = selectedMovieIndex + 1;
+            Movie selectedMovie = movieMap.get(movieId);
+            
+            // Find the corresponding showtime
+            List<Showtime> movieShowtimes = availableShowtimes.stream()
+                .filter(st -> st.getMovie().getId() == movieId)
+                .toList();
+            
+            if (selectedShowtimeIndex < movieShowtimes.size()) {
+                Showtime selectedShowtime = movieShowtimes.get(selectedShowtimeIndex);
+                String info = String.format("Price: $%.2f | Seats: %d/%d", 
+                    selectedMovie.getPrice(),
+                    selectedShowtime.getAvailableSeats(),
+                    20); // Assuming initial 20 seats total
+                
+                showtimeInfoLabel.setText(info);
+            }
+        }
+    }
+
+    private class BookButtonListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            int selectedMovieIndex = movieList.getSelectedIndex();
+            int selectedShowtimeIndex = showtimeComboBox.getSelectedIndex();
+            
+            if (selectedMovieIndex < 0 || selectedShowtimeIndex < 0) {
+                outputArea.setText("⚠️ Please select both a movie and showtime!");
+                outputArea.setForeground(Color.RED);
+                return;
+            }
+            
+            int movieId = selectedMovieIndex + 1;
+            List<Showtime> movieShowtimes = availableShowtimes.stream()
+                .filter(st -> st.getMovie().getId() == movieId)
+                .toList();
+            
+            if (selectedShowtimeIndex >= movieShowtimes.size()) {
+                outputArea.setText("⚠️ Please select a valid showtime!");
+                outputArea.setForeground(Color.RED);
+                return;
+            }
+            
+            Showtime selectedShowtime = movieShowtimes.get(selectedShowtimeIndex);
+            int showtimeId = selectedShowtime.getId();
+            
+            // Count selected seats
+            int seatCount = 0;
+            StringBuilder selectedSeats = new StringBuilder();
+            for (int i = 0; i < seats.length; i++) {
+                if (seats[i].isSelected()) {
+                    seatCount++;
+                    selectedSeats.append(seats[i].getText()).append(", ");
+                }
+            }
+
+            if (seatCount == 0) {
+                outputArea.setText("⚠️ No seats selected!");
+                outputArea.setForeground(Color.RED);
+            } else if (seatCount > selectedShowtime.getAvailableSeats()) {
+                outputArea.setText("❌ Only " + selectedShowtime.getAvailableSeats() + " seats available!");
+                outputArea.setForeground(Color.RED);
+            } else {
+                Booking booking = cinemaService.createBooking(customer.getId(), showtimeId, seatCount);
+                if (booking != null) {
+                    outputArea.setText("✅ Booking Confirmed!\n\n" +
+                            "Movie: " + booking.getShowtime().getMovie().getTitle() + "\n" +
+                            "Showtime: " + booking.getShowtime().getTime().format(DateTimeFormatter.ofPattern("MMM dd, HH:mm")) + "\n" +
+                            "Hall: " + booking.getShowtime().getHall() + "\n" +
+                            "Seats: " + selectedSeats.toString() + "\n" +
+                            "Total Price: $" + String.format("%.2f", booking.totalPrice()) + "\n" +
+                            "Booking ID: " + booking.getId());
+                    outputArea.setForeground(new Color(0, 100, 0));
+                    
+                    // Clear selected seats and update showtimes
+                    for (JCheckBox seat : seats) {
+                        seat.setSelected(false);
+                    }
+                    updateShowtimes(); // Refresh available seats
+                } else {
+                    outputArea.setText("Booking failed! Not enough seats available.");
+                    outputArea.setForeground(Color.RED);
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            CinemaBookingSystem system = new CinemaBookingSystem();
+            system.setVisible(true);
+        });
+    }
+}

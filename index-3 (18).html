@@ -1,0 +1,188 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: Jan 10, 2026 at 10:56 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `cinema_booking_system`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cinemaservice`
+--
+
+CREATE TABLE `cinemaservice` (
+  `service_id` int(15) NOT NULL,
+  `movies` varchar(10) DEFAULT NULL,
+  `show_time` time DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `cinemaservice`
+--
+
+INSERT INTO `cinemaservice` (`service_id`, `movies`, `show_time`) VALUES
+(1, 'Frozen 2 A', '16:00:00'),
+(2, 'Trolll 2', '18:30:00'),
+(3, 'The Lion K', '14:00:00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer`
+--
+
+CREATE TABLE `customer` (
+  `customer_id` int(10) NOT NULL,
+  `booking_id` int(20) DEFAULT NULL,
+  `customer_name` varchar(80) NOT NULL,
+  `password` varchar(20) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `phone` varchar(12) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `customer`
+--
+
+INSERT INTO `customer` (`customer_id`, `booking_id`, `customer_name`, `password`, `email`, `phone`) VALUES
+(15, 301, 'Sri Milan', 'milan0015', 'milan12@gmail.com', '‪+9472382712'),
+(16, 302, 'Medhani Niwoda', 'Niwoda0016', 'medhani@gmail.com', '‪+9470382745'),
+(17, 303, 'Pulindu Bandara', 'Bandara0017', 'pulindu@gmail.com', '‪+9478965443'),
+(18, 304, 'Kamal Perera', 'Perera0018', 'kamal01@gmail.com', '‪+9471965445'),
+(19, 305, 'Sanduni Priyalakshi', 'Priyalakshi0019', 'sanduni@gmail.com', '‪+9476965900');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `movies`
+--
+
+CREATE TABLE `movies` (
+  `id` int(11) NOT NULL,
+  `title` varchar(100) NOT NULL,
+  `genre` varchar(50) DEFAULT NULL,
+  `duration` int(11) DEFAULT NULL,
+  `price` decimal(5,2) DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `movies`
+--
+
+INSERT INTO `movies` (`id`, `title`, `genre`, `duration`, `price`) VALUES
+(1, 'Avatar: The Way of Water', 'Sci-Fi', 192, 999.99),
+(2, 'The Batman', 'Action', 176, 999.99),
+(3, 'Top Gun: Maverick', 'Action', 130, 950.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `person`
+--
+
+CREATE TABLE `person` (
+  `person_id` int(12) NOT NULL,
+  `person_name` varchar(80) DEFAULT NULL,
+  `email` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `person`
+--
+
+INSERT INTO `person` (`person_id`, `person_name`, `email`) VALUES
+(200002, 'Pulindu Bandara', 'pulindu@gmail.com'),
+(200102, 'Sri Milan', 'milan12@gmail.com'),
+(200203, 'Kamal Perera', 'Kamal01@gmail.com'),
+(200401, 'Medhani Niwoda', 'medhani7@gmail.com'),
+(200505, 'Sanduni Priyalakshi', 'sanduni@gmail.com');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `showtime`
+--
+
+CREATE TABLE `showtime` (
+  `showtime_id` int(12) NOT NULL,
+  `movie_id` int(10) DEFAULT NULL,
+  `hall` varchar(10) DEFAULT NULL,
+  `show_time` time DEFAULT NULL,
+  `available_seat` int(4) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `showtime`
+--
+
+INSERT INTO `showtime` (`showtime_id`, `movie_id`, `hall`, `show_time`, `available_seat`) VALUES
+(1, 101, 'Hall A', '14:00:00', 50),
+(2, 102, 'Hall B', '14:00:00', 45),
+(3, 103, 'Hall C', '16:00:00', 35),
+(4, 104, 'Hall C', '16:00:00', 30);
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `cinemaservice`
+--
+ALTER TABLE `cinemaservice`
+  ADD PRIMARY KEY (`service_id`);
+
+--
+-- Indexes for table `customer`
+--
+ALTER TABLE `customer`
+  ADD PRIMARY KEY (`customer_id`);
+
+--
+-- Indexes for table `movies`
+--
+ALTER TABLE `movies`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `person`
+--
+ALTER TABLE `person`
+  ADD PRIMARY KEY (`person_id`);
+
+--
+-- Indexes for table `showtime`
+--
+ALTER TABLE `showtime`
+  ADD PRIMARY KEY (`showtime_id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `movies`
+--
+ALTER TABLE `movies`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
